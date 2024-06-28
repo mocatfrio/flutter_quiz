@@ -41,22 +41,22 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
       child: Text('No questions added yet!'),
     );
 
-    if (questions.isNotEmpty) {
+    if (_questions.isNotEmpty) {
       content = ListView.builder(
-        itemCount: questions.length,
+        itemCount: _questions.length,
         itemBuilder: (context, index) => Dismissible(
           onDismissed: (direction) {
-            // _removeQuestion(questions[index]);
+            _removeQuestion(_questions[index]);
           },
-          key: ValueKey(questions[index].id),
+          key: ValueKey(_questions[index].id),
           child: ListTile(
-            title: Text(questions[index].text),
+            title: Text(_questions[index].text),
             leading: Container(
               width: 24,
               height: 24,
-              color: questions[index].category.color,
+              color: _questions[index].category.color,
             ),
-            trailing: Text(questions[index].answers.length.toString()),
+            trailing: Text(_questions[index].answers.length.toString()),
           ),
         ),
       );
