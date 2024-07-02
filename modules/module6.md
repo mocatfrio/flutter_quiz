@@ -362,7 +362,7 @@ Integrating **Firebase** as the backend for a Flutter application.
 
 4. Constructs a URL pointing to the specific question in the Firebase Realtime Database, using the `question’s id`.
     ```dart
-    final url = Uri.https('flutter-quiz-e62da-default-rtdb.firebaseio.com', 'question-list/${question.id}.json');
+    final url = Uri.https('flutter-quiz-xxx-default-rtdb.firebaseio.com', 'question-list/${question.id}.json');
     ```
 
 5. Send an asynchronous DELETE request to the specified URL to remove the question from the remote database.
@@ -383,3 +383,170 @@ If the DELETE request failed, the question is **reinserted** into its original p
 
 ## 4. Using FutureBuilder
 
+`FutureBuilder` is a widget in Flutter that helps **manage the state of an asynchronous operation** (like fetching data from a server) and update the UI based on the current state of the future. It is particularly useful for operations that return a Future and need to handle different states such as loading, completed, or error.
+
+### a. Restructure `_loadQuestions()`
+
+**lib/components/question_list_screen/question_list_screen.dart**
+
+1. Modify the `_loadQuestions` function to returns a `Future` value that resolves to a `List<Question>`. 
+    ```dart
+    Future<List<Question>> _loadQuestions() async {
+    ```
+
+2. Modify the error handling. If the response status code is 400 or higher, **an exception is thrown** indicating that the data fetching failed.
+    ```dart
+    // handling error
+    if (response.statusCode >= 400) {
+        throw Exception('Failed to fetch data.');
+    }
+    ```
+    If the response body is 'null', it means there is no data available. The method returns an empty list in this case.
+    ```dart
+    // handling "No Data" case
+    if (response.body == 'null') {
+        return [];
+    }
+    ```
+
+3. Return `_questions`
+    ```dart
+        ...
+        return _questions;
+    }
+    ```
+
+By using `FutureBuilder`, it becomes simpler because it eliminates the need to define `_errorText`, `_isLoading`, and `content`. `FutureBuilder` handles the loading, error, and data states automatically, streamlining the code and improving readability.
+
+### b. Restructure `_addQuestion()`
+
+**lib/components/question_list_screen/question_list_screen.dart**
+
+1. Modify the `_addQuestion` function to returns a `Future` value that resolves to a `List<Question>`. 
+    ```dart
+    Future<List<Question>> _addQuestion() async {
+    ```
+
+2. Return `_questions`
+    ```dart
+        ...
+        return _questions;
+    }
+    ```
+
+### c. Modify Variable and  `initState()`
+
+```dart
+class _QuestionListScreenState extends State<QuestionListScreen> {
+  List<Question> _questions = [];
+  late Future<List<Question>> _loadedQuestions;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadedQuestions = _loadQuestions();
+  }
+  ...
+```
+
+### d. Restructure Widget in the Question List Screen
+
+**lib/components/question_list_screen/question_list_screen.dart**
+
+```dart
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Question List'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _questions = _addQuestion() as List<Question>;
+              });
+            },
+            icon: const Icon(Icons.add),
+          )
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(colors: [
+            Color.fromARGB(255, 78, 13, 151),
+            Color.fromARGB(255, 107, 15, 168)
+          ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        ),
+        child: FutureBuilder(
+          future: _loadedQuestions,
+          builder: (context, snapshot) {
+            // if loading
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            // handle error
+            else if (snapshot.hasError) {
+              return Center(
+                child: Text(snapshot.error.toString()),
+              );
+            }
+
+            // if data is empty
+            else if (snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text('No questions added yet!'),
+              );
+            }
+
+            else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) => Dismissible(
+                  onDismissed: (direction) {
+                    _removeQuestion(snapshot.data![index]);
+                  },
+                  key: ValueKey(snapshot.data![index].id),
+                  child: ListTile(
+                    title: Text(snapshot.data![index].text),
+                    leading: Container(
+                      width: 24,
+                      height: 24,
+                      color: snapshot.data![index].category.color,
+                    ),
+                    trailing:
+                        Text(snapshot.data![index].answers.length.toString()),
+                  ),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+```
+
+1. AppBar
+   * AppBar: The top bar of the screen.
+     * Title: Displays the text 'Question List'
+     * Actions: Contains an IconButton for adding a new question.
+       * IconButton: When pressed, it calls `_addQuestion` and updates the `_questions` list using `setState`. 
+
+2. FutureBuilder
+   * FutureBuilder: Handles the `asynchronous` loading of questions.
+     * Future: The `_loadedQuestions` future that represents the data being fetched.
+     * Builder: A function that defines what to render based on the `snapshot` state.
+       * **Loading State**: If the Future is still loading (`ConnectionState.waiting`), it shows a `CircularProgressIndicator` in the center.
+       * **Error State**: If there's an error (`snapshot.hasError`), it shows an error message in the center.
+       * **Empty Data**: If the fetched data is empty (`snapshot.data!.isEmpty`), it shows a message indicating that no questions have been added yet.
+       * **Data Loaded**: If the data is successfully loaded, it builds a `ListView` to display the list of questions.
+
+3. ListView.builder
+   * ListView.builder: Constructs a **scrollable** list of questions.
+   * itemCount: The number of items in the list, derived from `snapshot.data!.length`.
+   * itemBuilder: Builds each item in the list.
+     * Dismissible: Wraps each list item to enable swipe-to-dismiss functionality.
+       * onDismissed: When an item is dismissed, it calls _removeQuestion to remove the question
+       * key: A unique key for each item, based on the question ID.
+     * ListTile: Represents each question with a title, a colored leading icon, and a trailing text showing the number of answers.
