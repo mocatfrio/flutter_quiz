@@ -70,9 +70,13 @@ In this module, I restructured the code In the lib folder to make it easier to m
 
 ### b. Run Project
 1. Launch **Flutter Emulator** in the VS Code. Select **Pixel 8 API 33** (adjust to the android emulator you've created)
-   ![alt text](img_module5/image.png)
+    <div style="text-align: center;">
+      <img src="img_module5/image.png" alt="Example Image" width="400">
+    </div>
 
-   ![alt text](img_module5/image1.png)
+    <div style="text-align: center;">
+      <img src="img_module5/image1.png" alt="Example Image" width="400">
+    </div>
    
 2. Run the project
     ```bash
