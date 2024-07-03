@@ -1,6 +1,6 @@
-# FLutter Quiz
+# Flutter Quiz
 
-A Flutter project for mobile programming.
+A Flutter project for mobile programming course.
 
 ## Getting Started
 
@@ -22,3 +22,9 @@ samples, guidance on mobile development, and a full API reference.
 5. [Module 5: Handling User Input with Form](modules/module5.md)
 6. [Module 6: Connecting a Backend](modules/module6.md) 
 7. [Module 7: Using Native Device Features](modules/module7.md)
+
+## Final Project
+
+* [Final Project](modules/final_project.md)
+
+

@@ -14,7 +14,11 @@ Integrating **Firebase** as the backend for a Flutter application.
     - [a. Load Question Data](#a-load-question-data)
   - [3. Sending DELETE Request to Backend](#3-sending-delete-request-to-backend)
     - [a. Delete Question Data](#a-delete-question-data)
-  - [3. Sending DELETE Request to Backend](#3-sending-delete-request-to-backend-1)
+  - [4. Using FutureBuilder](#4-using-futurebuilder)
+    - [a. Restructure `_loadQuestions()`](#a-restructure-_loadquestions)
+    - [b. Restructure `_addQuestion()`](#b-restructure-_addquestion)
+    - [c. Modify Variable and  `initState()`](#c-modify-variable-and--initstate)
+    - [d. Restructure Widget in the Question List Screen](#d-restructure-widget-in-the-question-list-screen)
 
 
 ## 1. Preparation 
